@@ -5,8 +5,6 @@ using CarDealer.DTOs.Export;
 using CarDealer.DTOs.Import;
 using CarDealer.Models;
 using CarDealer.Models.Utilities;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace CarDealer
 {
@@ -28,7 +26,7 @@ namespace CarDealer
             //Export
             using CarDealerContext context = new CarDealerContext();
 
-            string result = GetCarsWithDistance(context);
+            string result = GetCarsWithTheirListOfParts(context);
             Console.WriteLine(result);
         }
 
@@ -216,9 +214,43 @@ namespace CarDealer
         }
 
         //Problem 15
+        public static string GetCarsFromMakeBmw(CarDealerContext context)
+        {
+            IMapper mapper = InitializeAutoMapper();
 
+            XmlHelper xmllHelper = new XmlHelper();
 
+            ExportBMWCarsDto[] bmwCars = context.Cars
+                .Where(c => c.Make.ToUpper() == "BMW")
+                .OrderBy(c => c.Model)
+                .ThenByDescending(c => c.TraveledDistance)
+                .ProjectTo<ExportBMWCarsDto>(mapper.ConfigurationProvider)
+                .ToArray();
 
+            return xmllHelper.Serialize(bmwCars, "cars");
+        }
+
+        //Problem 16
+        //--
+
+        //Problem 17
+
+        public static string GetCarsWithTheirListOfParts(CarDealerContext context)
+        {
+            IMapper mapper = InitializeAutoMapper();
+
+            XmlHelper xmllHelper = new XmlHelper();
+
+            ExportCarWithPartsDto[] carsWithParts = context
+                .Cars
+                .OrderByDescending(c => c.TraveledDistance)
+                .ThenBy(c => c.Model)
+                .Take(5)
+                .ProjectTo<ExportCarWithPartsDto>(mapper.ConfigurationProvider)
+                .ToArray();
+
+            return xmllHelper.Serialize(carsWithParts, "cars");
+        }
 
 
     }

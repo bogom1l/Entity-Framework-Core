@@ -18,12 +18,21 @@ namespace CarDealer
                 .ForMember(d => d.SupplierId,
                     opt => opt
                         .MapFrom(s => s.SupplierId.Value));
+            this.CreateMap<Part, ExportCarPartDto>();
 
             //Car
             this.CreateMap<ImportCarDto, Car>()
                 .ForSourceMember(s => s.Parts, opt => opt.DoNotValidate());
 
             this.CreateMap<Car, ExportCarDto>();
+            this.CreateMap<Car, ExportBMWCarsDto>();
+            this.CreateMap<Car, ExportCarWithPartsDto>()
+                .ForMember(d => d.Parts,
+                    opt => opt.MapFrom(s => 
+                        s.PartsCars
+                            .Select(pc => pc.Part)
+                            .OrderByDescending(p=>p.Price)
+                            .ToArray()));
 
 
             //Customer
